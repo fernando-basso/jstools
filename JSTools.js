@@ -13,9 +13,9 @@ function fCh( elem ) {
 
     var child = elem.firstChild;
 
-    do {
+    while ( child && child.nodeType !== 1 ) { // Node.ELEMENT_NODE
         child = child.nextSibling;
-    } while ( child && child.nodeType !== 1 ); // Node.ELEMENT_NODE
+    }
 
     return child;
 }
@@ -24,9 +24,9 @@ function lCh( elem ) {
 
     var child = elem.lastChild;
 
-    do {
+    while ( child && child.nodeType !== 1 ) {
         child = child.previousSibling;
-    } while ( child && child.nodeType !== 1 ); // Node.ELEMENT_NODE
+    }
 
     return child;
 }
@@ -35,9 +35,9 @@ function nSibl( elem ) {
 
     var sibl = elem.nextSibling;
 
-    do {
+    while ( sibl && sibl.nodeType !== 1 ) {
         sibl = sibl.nextSibling;
-    } while ( sibl && sibl.nodeType !== 1 ); // Node.ELEMENT_NODE
+    }
 
     return sibl;
 }
@@ -46,11 +46,22 @@ function pSibl( elem ) {
 
     var sibl = elem.previousSibling;
 
-    do {
+    while ( sibl && sibl.nodeType !== 1 ) {
         sibl = sibl.previousSibling;
-    } while ( sibl && sibl.nodeType !== 1 ); // Node.ELEMENT_NODE
+    }
 
     return sibl;
+}
+
+function lCh( elem ) {
+
+    var child = elem.lastChild;
+
+    while ( child && child.nodeType !== 1 ) {
+        child = child.previousSibling;
+    }
+
+    return child;
 }
 
 if ( ! String.prototype.trim ) {
@@ -59,14 +70,20 @@ if ( ! String.prototype.trim ) {
     };
 }
 
+/**
+ * Encontra os nodes filhos de um node, mas somente os filhos imediatos.
+ *
+ * @param DomNode elem O elemento do qual se pretende encontrar os filhos.
+ * @return Array arr O array contendo zero ou mais nodes filhos de 'elem'.
+ */
 function children( elem ) {
 
     var arr = []; // Array vazio.
 
-    var child = fChild( elem );
+    var child = fCh( elem );
 
     do {
-        arr[arr.length] = child; // Adiciona no final do array.
+        arr[ arr.length ] = child; // Adiciona no final do array.
         child = nSibl( child );
     } while ( child );
 
@@ -104,7 +121,7 @@ function emailCheck( email ) {
 }
 
 /**
- * Transforma uma string de texto html em html entities
+ * Transforma uma string de texto html em html entities.
  *
  * @param String html String contento <html> para ser transformado em &lt;html&gt;
  * @returns String o html em forma the entities.
@@ -153,7 +170,6 @@ function makeNodes( insertMe ) {
         else {
             arr[ arr.length ] = a [ i ];
         }
-
     }
 
     return arr;
@@ -238,7 +254,7 @@ function remClass( name, elem ) {
         var newClass = cur.replace(re, '');
         elem.setAttribute('class', newClass);
 
-        // TODO: Talvez tenha que ver as vêzes não sobre espaços perdidos.
+        // TODO: Talvez tenha que ver se as vêzes não sobram espaços perdidos.
         // Nos testes, aparentemente estava ok mas...
     }
 }
@@ -273,10 +289,10 @@ function getByClass( className, start ) {
  */
 function serialize( data ) {
     var arr = [];
-    
+
     if ( data.constructor == Array ) {
         for ( var z = 0; z < data.length; ++z ) {
-            
+
             // Assume que são campos de formulário.
             arr.push( data[ z ].name + '=' + encodeURIComponent( data[ k ].value ) );
         }
@@ -286,12 +302,12 @@ function serialize( data ) {
             arr.push( key + '=' + encodeURIComponent( data[ key ] ) );
         }
     }
-                     
+
     return arr.join('&');
 }
 
 /**
- * NO MOMENTO ESSA FUNÇÃO SÓ FUNCIONA PARA RETORNO TEXTO E HTML.
+ * NO MOMENTO ESSA FUNÇÃO SÓ FUNCIONA PARA RETORNO TEXTO / HTML (não suporta xml ainda).
  */
 function ajax( options ) {
 
@@ -325,24 +341,24 @@ function ajax( options ) {
     if ( window.XMLHttpRequest ) {
 
         var xhr = new XMLHttpRequest();
-    
+
         if ( args.type === 'GET' ) {
             args.url += '?' + serialize( args.data );
         }
-    
+
         xhr.open(args.type, args.url, true);
-        
+
         // O handler do onreadystatechange deve ser realmente definido/chamado
         // antes do .send().
         xhr.onreadystatechange = function() {
-    
+
             if ( checkRequestStatus() ) {
                 // TODO: Nem sempre será texto. Melhorar isso.
                 args.onSuccess( xhr.responseText );
             }
-            
+
         }
-        
+
         // Seta o header necessário.
         xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' );
 
