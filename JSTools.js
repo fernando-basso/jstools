@@ -377,3 +377,38 @@ function ajax( options ) {
         alert('O seu navegador é muito antigo.');
     }
 }
+
+/**
+ * Pega o valor de um parâmetro na url.
+ *
+ * @param String name o Nome do parâmetro na url.
+ * @return String O valor do parâmetro, ou null ou '' se não existe.
+ */
+function getParam( name ) {
+
+    var url;
+    var i = 0;
+    var len;
+    var pair;
+
+    url = window.location.href.split( '?' )[ 1 ];
+
+    if ( url ) {
+        // Assumindo que o separador vai ser &, e não &amp;
+        var keyValuePairs = url.split( '&' );
+
+        len = keyValuePairs.length;
+
+        for ( ; i < len; ++i ) {
+            // [ 0 ] será chave, [ 1 ] será o valor.
+            pair = keyValuePairs[ i ].split( '=' );
+            if ( pair[ 0 ] === name ) {
+                // Se tinha aquele nome, retorna o valor dele.
+                return pair[ 1 ]; // Se tem a chave, o = e não tem o valor, vai retornar
+                                  // uma string vazia, que é 'false' em JavaScript.
+            }
+        }
+
+        return null;
+    }
+}
