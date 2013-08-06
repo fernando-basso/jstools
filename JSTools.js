@@ -1,4 +1,4 @@
-out = console.log;
+var out = console.log;
 
 function id( id ) {
     return document.getElementById( id );
@@ -282,7 +282,81 @@ function getByClass( className, start ) {
 }
 
 /**
- * Prepara dados para envio por ajax.
+ * Retorna o valor do atributo, ou seta um valor novo.
+ *
+ * Se o parâmetro 'newValue' for passado, a função assume
+ * que queremos setar um novo valor novo, senão assume que
+ * queremos buscar o valor do attributo 'attrName'.
+ *
+ * @param String aTag Uma tag, a qual retiramos o valor do atributo ou setamos um novo.
+ * @param String Um node de attributo.
+ * @param String [opcional] Um valor para o attributo.
+ */
+function attr( aTag, attrName, newValue ) {
+
+    var z;
+
+    if ( ! newValue ) {
+        if ( aTag.hasAttribute( attrName ) ) {
+            return aTag.getAttribute( attrName );
+        }
+        else {
+            return null;
+        }
+    }
+    else {
+        aTag.setAttribute( attrName, newValue );
+    }
+}
+
+/**
+ * Se passar só o attrName, pega todos os elementos que contenham aquele
+ * atributo, independente do valor. Se passar attrName e attrValue, só
+ * pega os elementos que tenham aquele atributo com aquele valor.
+ *
+ * @param Object args Um objeto com as opções.
+ */
+function getByAttr( opts ) {
+
+    var args = {
+        'attrName': opts.attrName || null,
+        'attrValue': opts.attrValue || null,
+        'tagName': opts.tagName || '*'
+    };
+
+    var matches = [];
+
+    if ( args.attrName ) {
+
+        var nodes = tag( args.tagName );
+
+        // se o user quer os elementos com aquele atributo e com aquele valor....
+        if ( args.attrValue ) {
+            for ( var i = 0; i < nodes.length; ++i ) {
+                var curNode = nodes[ i ];
+                if ( attr( curNode, args.attrName ) == args.attrValue ) {
+                    matches.push( curNode );
+                }
+            }
+        }
+        else { // Se o user só que saber se tem aquele atributo, não importa o valor...
+            for ( var i = 0; i < nodes.length; ++i ) {
+                var curNode = nodes[ i ];
+                if ( attr( curNode, args.attrName ) ) {
+                    matches.push( curNode );
+                }
+            }
+        }
+
+        return matches;
+    }
+    else {
+        return null;
+    }
+}
+
+/**
+ * Serializa dados para envio por ajax.
  *
  * @param Object/Array data Um Objeto ou Array que será serializado.
  * @returns String Uma string com os dados serializados, prontos para o envio por ajax.
@@ -400,7 +474,7 @@ function getParam( name ) {
         len = keyValuePairs.length;
 
         for ( ; i < len; ++i ) {
-            // [ 0 ] será chave, [ 1 ] será o valor.
+            // [ 0 ] é a chave, [ 1 ] é o valor.
             pair = keyValuePairs[ i ].split( '=' );
             if ( pair[ 0 ] === name ) {
                 // Se tinha aquele nome, retorna o valor dele.
@@ -410,5 +484,32 @@ function getParam( name ) {
         }
 
         return null;
+    }
+}
+
+/**
+ * Seta checkboxes de acordo com parâmetros NA URL.
+ *
+ * Parecido com o o que faríamos em php. Se a url tem aquele
+ * nome=valor, deixamos campo marcado por padrão. Isso é útil
+ * em casos que o usuário faz uma pesquisa em um formulário
+ * e depois do reload queremos persistir as opções da pesquisa
+ * no formulário.
+ *
+ * Se a url tem algum parâmetro que casa com algum dos checkboxes,
+ * o checkbox em questão ficará marcado após o reload.
+ *
+ * @param Array checkboxes Um array de checkboxes.
+ * @param Array values Um array de valores.
+ */
+function setCheckBox( checkboxes, values ) {
+    for ( var z = 0; z < checkboxes.length; ++z ) {
+        var curChk = checkboxes[ z ];
+        for ( var k = 0; k < values.length; ++k ) {
+            var curValue = values[ k ];
+            if ( curChk.name == curValue && getParam( curValue ) ) {
+                curChk.checked = true;
+            }
+        }
     }
 }
