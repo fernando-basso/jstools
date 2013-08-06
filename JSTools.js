@@ -513,3 +513,24 @@ function setCheckBox( checkboxes, values ) {
         }
     }
 }
+
+/**
+ * Seleciona um <option> caso o 'value' seja igual um dos
+ * valores passados no array 'values'.
+ *
+ * @param Array selectBoxes Um array de select boxes.
+ * @param Array Um array de valores.
+ */
+function setSelectBox( selectBoxes, values ) {
+    for ( var z = 0; z < selectBoxes.length; ++z ) {
+        var curBox = selectBoxes[ z ];
+        for ( var k = 0; k < values.length; ++k ) {
+            var curVal = values[ k ];
+            out( curBox.value );
+            if ( curBox.value == getParam( curVal ) ) {
+                out( curVal );
+                curBox.selected = true;
+            }
+        }
+    }
+}
